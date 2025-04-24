@@ -1,0 +1,10 @@
+Create a Namespace for your Deployment
+--------------------------------------
+
+kubectl get namespace
+kubectl create namespace <any name of namespace>
+
+
+[Now edit the deployment file and add Namespace to it.]
+
+kubectl apply -f deployment.yml -n <nmespc nme>

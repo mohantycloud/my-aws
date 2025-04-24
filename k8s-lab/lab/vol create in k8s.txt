@@ -1,0 +1,109 @@
+creating a Persistent Volume YAML definition file.
+--------------------------------------------------
+kubectl create namespace deploy1
+
+vi pv.yml
+
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: pv-todo-app
+    spec:
+      capacity:
+        storage: 1Gi
+      accessModes:
+        - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Retain
+      hostPath:
+        path: "/tmp/data"
+
+  kubectl apply -f <pv-yaml-file>
+  kubectl get pv
+
+
+A Persistent Volume Claim (PVC) is a request for storage by a pod or application.
+
+creating a Persistent Volume Claim YAML definition file.
+--------------------------------------------------------
+
+vi pvc.yml
+
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: pvc-todo-app
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 500Mi
+
+
+  kubectl apply -f <pvc-yaml-file>
+  kubectl get pvc
+
+
+Creating Deployment to use PV
+-----------------------------
+
+vi deployment.yml
+
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: todo-app-deployment
+    namespace: deploy1
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: todo-app
+    template:
+      metadata:
+        labels:
+          app: todo-app
+      spec:
+        containers:
+          - name: todo-app
+            image: urdevops/reddit-clone
+            ports:
+              - containerPort: 8000
+            volumeMounts:
+              - name: todo-app-data
+                mountPath: /app
+        volumes:
+          - name: todo-app-data
+            persistentVolumeClaim:
+              claimName: pvc-todo-app
+
+  kubectl apply -f deployment.yml
+  kubectl get deployment
+  kubectl get pod -n deploy1
+  
+
+Accessing data in the Persistent Volume in POD
+-----------------------------------------------
+
+Connect to a Pod in your Deployment using the command :
+  kubectl get pod -o wide
+  kubectl exec -it <pod-name> -n <namespace> -- /bin/bash
+  cd /app
+  ls
+  echo "hi i am using volume" > file_pv.txt
+  ls
+  cat <file-name>
+
+Accessing data in the Persistent Volume After Deleting POD
+-----------------------------------------------------------
+
+kubectl get pod -o wide
+kubectl delete pod <pod-name>
+
+now u can verify , newly created pod also have data.
+
+
+---------------------------------------------end--------------------------------------------------------
+
+
+

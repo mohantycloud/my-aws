@@ -1,0 +1,117 @@
+Create a ConfigMap for your Deployment
+--------------------------------------
+
+kubectl create namespace deploy1
+vi configmap.yml
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-configmap
+  labels:
+    app: django-todo-app
+  namespace: deploy1
+data:
+  MYSQL_DB: "database_todo"
+
+
+kubectl apply -f configmap.yml
+kubectl get configmap -n <namespace>
+
+
+
+Create a Secret for your Deployment
+------------------------------------
+
+using base64 you can encode and decode
+======================================
+echo -n 'admin@123' | base64
+
+to verify
+=========
+
+echo <add s-code> | base64 --decode
+
+vi secret.yml
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-secret
+  namespace: deploy1
+type: Opaque
+data:
+  password: YWRtaW5AMTIz
+
+
+kubectl apply -f secret.yml -n deploy1
+kubectl get secrets -n deploy1
+
+vi sqldeployment.yml
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-configuration
+  labels:
+    app: mysql
+  namespace: deploy1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql-container
+          image: mysql:8
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: my-secret
+                  key: password
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: my-configmap
+                  key: MYSQL_DB
+
+kubectl apply -f sqldeployment.yml -n deploy1
+kubectl get pods -n deploy1
+
+vi sqlservice.yml
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service-configuration
+spec:
+  ports:
+    - name: mysql
+      port: 3306
+  clusterIP: None
+  selector:
+    app: mysql
+
+kubectl apply -f sqlservice.yml -n deploy1
+sudo apt install mysql-client-core-8.0
+kubectl exec -n <namespace> <pod-nme> -c <container-nme> -it -- /bin/sh
+mysql -u root -p 
+
+(use pw a******)
+
+
+------------------------------------------------------end------------------------------------------------------------------------------------
+
+
+
+
