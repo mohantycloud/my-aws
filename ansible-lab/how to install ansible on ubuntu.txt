@@ -1,0 +1,36 @@
+HOW TO INSTALL ANSIBLE ON UBUNTU(LINUX) MACHINE
+===============================================
+
+1. Create 1 EC2 instance.
+--------------------------
+
+ami -> ubuntu-22
+instance types -> t2.micro
+key pair -> myansible-key.pem
+vpc -> default vpc
+az -> 1a
+sg -> ubuntu-SG (ssh,http,https,all traffic = ANYWHERE)
+
+2. Connect EC2 instance and install ansible on master
+-------------------------------------------------------
+
+go to your terminal
+cd downloads
+ls
+ssh -i "mykey.pem" ubuntu@ec2-3-6-89-52.ap-south-1.compute.amazonaws.com
+
+sudo apt-add-repository ppa:ansible/ansible
+sudo apt update
+sudo apt install ansible -y
+ansible --version
+
+-------installed-------
+
+cd .ssh/
+sudo vi ansible_key (paste private key) , :wq
+sudo chmod 600 ansible_key
+
+====================================================END==================================================================================================
+
+
+
