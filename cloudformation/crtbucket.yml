@@ -1,0 +1,7 @@
+Resources:
+  S3BUCKET:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+        BucketName: "demo-dev-bucket-2024"
+        VersioningConfiguration:
+            Status: Enabled

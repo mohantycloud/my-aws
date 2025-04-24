@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creating an ec2 instance that has an EIP and Security group attached to it
+
+Resources:
+  HTTpSShSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP and SSH traffic 
+      GroupName: DemoSecurityGroup
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+  MyEC2Instance: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      ImageId: ami-03207216a55ac008f   #check for the correct ami-id from the ec2 console 
+      InstanceType: t2.micro
+      Tags:
+        - Key: Name
+          Value: DevInstance
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash -xe
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo '<html><h1>welcome to cloudformation world</h1></html>' > /var/www/html/index.html
+      SecurityGroups: 
+        - !Ref HTTpSShSecurityGroup
+  MyElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref MyEC2Instance

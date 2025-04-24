@@ -1,0 +1,11 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "This is our first instance using CloudFormation"
+Resources:
+  mydemoinstance:
+    Type: 'AWS::EC2::Instance'
+    Properties: 
+      ImageId: ami-013e83f579886baeb
+      KeyName: cf-key
+      SecurityGroupIds: 
+        - sg-04156b506868cdce5
+      InstanceType: t2.nano
