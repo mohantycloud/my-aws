@@ -1,0 +1,88 @@
+config map
+==========
+
+1. Create a namespace using this command
+----------------------------------------
+
+kubectl create namespace mynamespace
+kubectl get ns
+
+2. Update the configMap.yml file
+---------------------------------
+
+vi configMap.yml
+
+[paste below code]
+
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: application-demo
+  namespace: mynamespace
+data:
+  name: django-demo
+  application: django-todo
+  protocol: TCP
+
+:wq
+
+
+3. Update the deployment.yml file to include the ConfigMap
+-----------------------------------------------------------
+
+vi deployment.yml
+
+[paste below code]
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-todo-deployment
+  namespace: mynamespace
+  labels:
+    app: django-todo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: django-todo
+  template:
+    metadata:
+      labels:
+        app: django-todo
+    spec:
+      containers:
+      - name: django-todo
+        image: nahid0002/django-todo-app:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: application
+          valueFrom:
+            configMapKeyRef:
+              name: application-demo
+              key: application
+
+
+:wq
+
+
+kubectl apply -f configMap.yml
+kubectl apply -f deployment.yml
+
+
+4. Use the describe command for a detailed view of the config map
+------------------------------------------------------------------
+
+kubectl get configmaps -n mynamespace
+kubectl describe configmap application-demo -n mynamespace
+
+
+5. Navigate inside the Pod and check
+-------------------------------------
+
+kubectl get pods -n mynamespace
+
+
+
+
